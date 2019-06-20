@@ -1,0 +1,32 @@
+{
+    "appname": "vueapp",
+    "appdir": "{{{appdir}}}",
+
+    "dbUrl": "sqlite://{{{appdir}}}/work/vueapp.db",
+    "tablePageSize": 8,
+    "requestTimeoutMillis": 3000,
+    "debounceWaitMillis": 500,
+    "sortArrow": {
+        "asc": 8593,
+        "desc":8595 
+    },
+
+    "logging": {
+        "appenders": [{
+            "appenderType": "CONSOLE",
+            "thresholdLevel": "DEBUG"
+        }],
+        "loggers": {
+            "staticlib": "WARN",
+            "wilton": "INFO",
+            "wilton.DBConnection": "INFO",
+            "vueapp": "DEBUG"
+        }
+    },
+
+    "launcher": {
+        "tcpPort": 8080,
+        "rootModuleName": "vueapp",
+        "startupModule": "vueapp/index"
+    }
+}
