@@ -114,7 +114,7 @@ define([
                     params.email= this.filters.email;
                 }
                 // dispatch action
-                dispatch("usersList/loadUsers", params);
+                dispatch(module, "loadUsers", params);
             },
 
             loadPage: function(page) {

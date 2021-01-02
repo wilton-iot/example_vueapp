@@ -62,7 +62,7 @@ define([
             },
 
             save: function() {
-                dispatch('addUser/saveUser', this.user);
+                dispatch(module, "saveUser", this.user);
             }
         }
     };
