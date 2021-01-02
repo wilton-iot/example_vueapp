@@ -28,60 +28,58 @@ define([
     var logger = new Logger(module.id);
     utils.checkRootModuleName(module, "vueapp");
 
-    return {
-        main: function() {
-            var conf = loader.loadAppConfig(module);
-            // create necessary dirs
-            fs.mkdir(conf.appdir + "work", function() {});
+    return function() {
+        var conf = loader.loadAppConfig(module);
+        // create necessary dirs
+        fs.mkdir(conf.appdir + "work", function() {});
 
-            // init logging
-            Logger.initialize(conf.logging);
+        // init logging
+        Logger.initialize(conf.logging);
 
-            // share conf for other threads
-            new Channel("vueapp/server/conf", 1).send(conf);
-            // prepare lock for sqlite access
-            new Channel(conf.dbUrl, 1);
+        // share conf for other threads
+        new Channel("vueapp/server/conf", 1).send(conf);
+        // prepare lock for sqlite access
+        new Channel(conf.dbUrl, 1);
 
-            // init db using lazy-load deps
-            require([
-                "vueapp/server/db",
-                "vueapp/server/models/schema",
-                "vueapp/server/models/user"
-            ], function(db, schema, user) {
-                schema.create();
-                db.doInSyncTransaction(conf.dbUrl, function() {
-                    user.insertDummyRecords();
-                });
-                db.close();
+        // init db using lazy-load deps
+        require([
+            "vueapp/server/db",
+            "vueapp/server/models/schema",
+            "vueapp/server/models/user"
+        ], function(db, schema, user) {
+            schema.create();
+            db.doInSyncTransaction(conf.dbUrl, function() {
+                user.insertDummyRecords();
             });
+            db.close();
+        });
 
-            // start server
-            var server = new Server({
-                tcpPort: 8080,
-                views: [
-                    "vueapp/server/views/addUser",
-                    "vueapp/server/views/config",
-                    "vueapp/server/views/usersList"
-                ],
-                rootRedirectLocation: "/web/index.html",
-                documentRoots: [{
-                    resource: "/web",
-                    dirPath: loader.findModulePath("vueapp/web"),
-                    cacheMaxAgeSeconds: 0
-                },
-                {
-                    resource: "/stdlib",
-                    zipPath: misc.wiltonConfig().wiltonHome + "std.wlib",
-                    cacheMaxAgeSeconds: 0
-                }]
-            });
-            logger.info("Server started: http://127.0.0.1:8080/" );
+        // start server
+        var server = new Server({
+            tcpPort: 8080,
+            views: [
+                "vueapp/server/views/addUser",
+                "vueapp/server/views/config",
+                "vueapp/server/views/usersList"
+            ],
+            rootRedirectLocation: "/web/index.html",
+            documentRoots: [{
+                resource: "/web",
+                dirPath: loader.findModulePath("vueapp/web"),
+                cacheMaxAgeSeconds: 0
+            },
+            {
+                resource: "/stdlib",
+                zipPath: misc.wiltonConfig().wiltonHome + "std.wlib",
+                cacheMaxAgeSeconds: 0
+            }]
+        });
+        logger.info("Server started: http://127.0.0.1:8080/" );
 
-            // wait for shutdown
-            misc.waitForSignal();
+        // wait for shutdown
+        misc.waitForSignal();
 
-            logger.info("Shutting down ...");
-            server.stop();
-        }
+        logger.info("Shutting down ...");
+        server.stop();
     };
 });
